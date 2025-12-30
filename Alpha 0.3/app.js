@@ -1,4 +1,4 @@
-// Load data from phone storage
+// Initialization
 let users = JSON.parse(localStorage.getItem('stepData')) || [];
 
 const GOALS = [
@@ -8,67 +8,95 @@ const GOALS = [
     { name: "👑 Step Legend", goal: 100000 }
 ];
 
-// --- CORE ACTIONS ---
+// --- USER MANAGEMENT ---
 
 function addUser() {
     const nameInput = document.getElementById('new-user-name');
-    if (!nameInput.value) return;
-    users.push({ name: nameInput.value, steps: 0, badges: [] });
+    const name = nameInput.value.trim();
+    if (!name) return alert("Please enter a name");
+    
+    users.push({ 
+        name: name, 
+        steps: 0, 
+        badges: [] 
+    });
+    
     nameInput.value = "";
     saveAndRefresh();
-}
-
-function quickAdd(amount) {
-    const userIndex = document.getElementById('user-select').value;
-    if (userIndex === "") return alert("Please select a friend first!");
-    
-    if (navigator.vibrate) navigator.vibrate(40);
-    users[userIndex].steps += amount;
-    checkBadges(users[userIndex]);
-    saveAndRefresh();
-}
-
-function addSteps() {
-    const userIndex = document.getElementById('user-select').value;
-    const amount = parseInt(document.getElementById('step-amount').value);
-    if (isNaN(amount) || userIndex === "") return alert("Enter steps and select a friend!");
-
-    users[userIndex].steps += amount;
-    checkBadges(users[userIndex]);
-    document.getElementById('step-amount').value = "";
-    saveAndRefresh();
+    if (navigator.vibrate) navigator.vibrate(50);
 }
 
 function deleteUser() {
     const userIndex = document.getElementById('user-select').value;
-    if (userIndex === "") return alert("Select a friend to delete!");
+    
+    if (userIndex === "" || userIndex === null) {
+        alert("Please select a friend from the dropdown first!");
+        return;
+    }
 
-    const confirmDelete = confirm(`Delete ${users[userIndex].name}?`);
-    if (confirmDelete) {
-        users.splice(userIndex, 1);
+    const userName = users[parseInt(userIndex)].name;
+    if (confirm(`Are you sure you want to delete ${userName}?`)) {
+        users.splice(parseInt(userIndex), 1);
         saveAndRefresh();
         if (navigator.vibrate) navigator.vibrate(100);
     }
 }
 
 function resetAllData() {
-    if (confirm("Delete ALL friends and ALL steps?")) {
+    if (confirm("⚠️ DELETE EVERYTHING? This will remove all friends and all steps forever.")) {
         users = [];
         saveAndRefresh();
         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
     }
 }
 
-// --- LOGIC & UI ---
+// --- STEP UPDATES ---
+
+function quickAdd(amount) {
+    const userIndex = document.getElementById('user-select').value;
+    if (userIndex === "") return alert("Please select a friend first!");
+    
+    users[parseInt(userIndex)].steps += amount;
+    checkBadges(users[parseInt(userIndex)]);
+    saveAndRefresh();
+    if (navigator.vibrate) navigator.vibrate(40);
+}
+
+function addSteps() {
+    const userIndex = document.getElementById('user-select').value;
+    const amountInput = document.getElementById('step-amount');
+    const amount = parseInt(amountInput.value);
+
+    if (userIndex === "") return alert("Please select a friend first!");
+    if (isNaN(amount) || amount <= 0) return alert("Please enter a valid number of steps");
+
+    users[parseInt(userIndex)].steps += amount;
+    checkBadges(users[parseInt(userIndex)]);
+    amountInput.value = "";
+    saveAndRefresh();
+    if (navigator.vibrate) navigator.vibrate(60);
+}
+
+// --- LOGIC ---
 
 function checkBadges(user) {
+    let newBadgeEarned = false;
     GOALS.forEach(g => {
         if (user.steps >= g.goal && !user.badges.includes(g.name)) {
             user.badges.push(g.name);
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            newBadgeEarned = true;
         }
     });
+
+    if (newBadgeEarned) {
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#818cf8', '#2dd4bf', '#ffffff']
+        });
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    }
 }
 
 function saveAndRefresh() {
@@ -77,44 +105,58 @@ function saveAndRefresh() {
 }
 
 function render() {
-    // 1. Render Leaderboard
+    // 1. Leaderboard
     const list = document.getElementById('leaderboard-list');
     const sorted = [...users].sort((a, b) => b.steps - a.steps);
-    list.innerHTML = sorted.map((u, i) => {
-        const nextGoal = GOALS.find(g => u.steps < g.goal) || GOALS[GOALS.length - 1];
-        const percent = Math.min((u.steps / nextGoal.goal) * 100, 100);
-        const level = Math.floor(u.steps / 5000) + 1;
-        
-        return `
-            <div class="row">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span><b>#${i+1}</b> ${u.name} <small style="color:var(--accent); margin-left:5px;">Lvl ${level}</small></span>
-                    <span style="font-weight:bold;">${u.steps.toLocaleString()}</span>
-                </div>
-                <div class="progress-container"><div class="progress-bar" style="width:${percent}%"></div></div>
-            </div>
-        `;
-    }).join('');
-
-    // 2. Update Dropdown (Mapping index to actual user in 'users' array)
-    const select = document.getElementById('user-select');
-    select.innerHTML = '<option value="">-- Choose Friend --</option>' + 
-        users.map((u, i) => `<option value="${i}">${u.name}</option>`).join('');
-
-    // 3. Render Badges
-    const badgeList = document.getElementById('badges-list');
-    badgeList.innerHTML = users.map(u => `
-        <div class="card" style="margin-bottom:15px;">
-            <div style="margin-bottom:10px"><b>${u.name}</b> Achievements</div>
-            <div class="badge-grid">
-                ${GOALS.map(g => `
-                    <div class="badge-item ${u.badges.includes(g.name) ? 'unlocked' : ''}" title="${g.name}">
-                        ${g.name.split(' ')[0]}
+    
+    if (users.length === 0) {
+        list.innerHTML = '<p style="text-align:center; opacity:0.5;">No friends added yet. Go to the "+" tab!</p>';
+    } else {
+        list.innerHTML = sorted.map((u, i) => {
+            const nextGoal = GOALS.find(g => u.steps < g.goal) || GOALS[GOALS.length - 1];
+            const percent = Math.min((u.steps / nextGoal.goal) * 100, 100);
+            const level = Math.floor(u.steps / 5000) + 1;
+            
+            return `
+                <div class="row">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span><b>#${i+1}</b> ${u.name} <small style="color:var(--accent); margin-left:5px;">Lvl ${level}</small></span>
+                        <span style="font-weight:bold;">${u.steps.toLocaleString()}</span>
                     </div>
-                `).join('')}
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width:${percent}%"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // 2. Dropdown Update
+    const select = document.getElementById('user-select');
+    let options = '<option value="">-- Choose Friend --</option>';
+    users.forEach((u, i) => {
+        options += `<option value="${i}">${u.name}</option>`;
+    });
+    select.innerHTML = options;
+
+    // 3. Badges Update
+    const badgeList = document.getElementById('badges-list');
+    if (users.length === 0) {
+        badgeList.innerHTML = '<p style="text-align:center; opacity:0.5;">Add friends to see achievements.</p>';
+    } else {
+        badgeList.innerHTML = users.map(u => `
+            <div class="card" style="margin-bottom:15px;">
+                <div style="margin-bottom:10px"><b>${u.name}</b> Achievements</div>
+                <div class="badge-grid">
+                    ${GOALS.map(g => `
+                        <div class="badge-item ${u.badges.includes(g.name) ? 'unlocked' : ''}">
+                            ${g.name.split(' ')[0]}
+                        </div>
+                    `).join('')}
+                </div>
             </div>
-        </div>
-    `).join('');
+        `).join('');
+    }
 }
 
 function showSection(id, btn) {
@@ -122,13 +164,8 @@ function showSection(id, btn) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(id).style.display = 'block';
     btn.classList.add('active');
-    if (navigator.vibrate) navigator.vibrate(20);
+    if (navigator.vibrate) navigator.vibrate(15);
 }
 
-// Register Service Worker for PWA (Android Address Bar Removal)
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(() => console.log("SW Registered"));
-}
-
-// Initial Load
+// Initial Run
 render();
