@@ -21,54 +21,39 @@ body {
 
 .section-title { font-size: 1.4rem; margin-bottom: 20px; color: var(--primary); font-weight: 800; }
 
-/* Record Board Styling */
 .record-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: rgba(250, 204, 21, 0.1);
-    border: 1px dashed var(--record);
-    padding: 12px;
-    border-radius: 18px;
-    margin-bottom: 20px;
-    color: var(--record);
-    font-size: 0.85rem;
-    font-weight: bold;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: rgba(250, 204, 21, 0.1); border: 1px dashed var(--record);
+    padding: 12px; border-radius: 18px; margin-bottom: 20px;
+    color: var(--record); font-size: 0.85rem; font-weight: bold;
 }
 
 .card {
-    background: var(--card);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 20px;
-    border-radius: 24px;
-    margin-bottom: 20px;
+    background: var(--card); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1); padding: 20px;
+    border-radius: 24px; margin-bottom: 20px;
 }
 
-/* Progress Bar Fixes */
-.progress-container { background: rgba(0,0,0,0.3); height: 10px; border-radius: 10px; margin-top: 8px; overflow: hidden; }
+/* Linear Progress Bar Styling */
+.progress-container { 
+    background: rgba(255, 255, 255, 0.1); 
+    height: 10px; 
+    border-radius: 10px; 
+    margin-top: 8px; 
+    overflow: hidden; 
+    position: relative;
+}
+
 .progress-bar { 
     background: linear-gradient(90deg, var(--primary), var(--accent)); 
     height: 100%; 
     border-radius: 10px; 
-    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 0 10px rgba(129, 140, 248, 0.3);
+    transition: width 0.6s ease-out; /* Linear feel */
 }
 
-/* 3-Column Badge Grid */
 .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .badge-item { 
-    background: rgba(255,255,255,0.03); 
-    border-radius: 16px; 
-    padding: 15px 5px;
+    background: rgba(255,255,255,0.03); border-radius: 16px; padding: 15px 5px;
     display: flex; flex-direction: column; align-items: center; justify-content: center; 
     filter: grayscale(1); opacity: 0.2; border: 1px solid rgba(255,255,255,0.05);
 }
@@ -76,13 +61,13 @@ body {
 .badge-emoji { font-size: 1.8rem; margin-bottom: 6px; }
 .badge-info { font-size: 10px; text-align: center; line-height: 1.2; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
 
-/* Nav & General Buttons */
 nav { position: fixed; bottom: 25px; left: 20px; right: 20px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); display: flex; justify-content: space-around; padding: 12px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.15); z-index: 1000; }
 .nav-btn { background: transparent; font-size: 1.6rem; opacity: 0.4; border: none; color: white; }
-.nav-btn.active { opacity: 1; color: var(--primary); transform: scale(1.1); }
-.btn-primary, .btn-accent { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
+.nav-btn.active { opacity: 1; color: var(--primary); }
+.btn-primary, .btn-accent { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; margin-top: 5px; }
 .btn-primary { background: var(--primary); color: white; }
 .btn-accent { background: var(--accent); color: #0f172a; }
 .btn-secondary { background: rgba(255,255,255,0.05); color: white; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); font-weight: bold; }
 select, input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; margin: 8px 0 18px 0; box-sizing: border-box; }
 .streak-badge { background: rgba(251, 146, 60, 0.1); color: var(--streak); padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 800; margin-left: 6px; }
+.row { background: var(--card); margin-bottom: 12px; padding: 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
