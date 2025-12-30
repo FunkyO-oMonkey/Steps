@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>StepBuddy Pro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
@@ -24,7 +24,9 @@
             
             <div class="card">
                 <label>SELECT FRIEND</label>
-                <select id="user-select"></select>
+                <select id="user-select">
+                    <option value="">-- Choose Friend --</option>
+                </select>
 
                 <label>QUICK ADD</label>
                 <div class="quick-add-grid">
