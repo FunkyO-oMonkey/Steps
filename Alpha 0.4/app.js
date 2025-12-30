@@ -16,7 +16,35 @@ const GOALS = [
     { name: "🏆 Immortal", goal: 1000000 }
 ];
 
-// --- CORE FUNCTIONS ---
+const SECTIONS = ['leaderboard', 'add-steps', 'badges'];
+let currentSectionIndex = 0;
+
+// --- SWIPE LOGIC ---
+let touchstartX = 0;
+let touchendX = 0;
+
+function handleGesture() {
+    if (touchendX < touchstartX - 70) switchTab(1); // Swipe Left -> Next Tab
+    if (touchendX > touchstartX + 70) switchTab(-1); // Swipe Right -> Prev Tab
+}
+
+function switchTab(direction) {
+    let nextIndex = currentSectionIndex + direction;
+    if (nextIndex >= 0 && nextIndex < SECTIONS.length) {
+        currentSectionIndex = nextIndex;
+        const targetId = SECTIONS[currentSectionIndex];
+        const targetBtn = document.querySelectorAll('.nav-btn')[currentSectionIndex];
+        showSection(targetId, targetBtn);
+    }
+}
+
+document.addEventListener('touchstart', e => touchstartX = e.changedTouches[0].screenX);
+document.addEventListener('touchend', e => {
+    touchendX = e.changedTouches[0].screenX;
+    handleGesture();
+});
+
+// --- CORE LOGIC ---
 
 function updateRecord(amount, name) {
     if (amount > globalRecord.amount) {
@@ -122,14 +150,13 @@ function render() {
     let html = `<div class="record-box">⭐ Record Update: ${globalRecord.amount.toLocaleString()} by ${globalRecord.holder}</div>`;
     
     html += sorted.map((u, i) => {
-        // Find the next goal target
         const nextGoalObj = GOALS.find(g => u.steps < g.goal) || GOALS[GOALS.length - 1];
-        
-        // SIMPLE LINEAR MATH: Current Steps / Next Goal
         const percent = Math.min((u.steps / nextGoalObj.goal) * 100, 100);
-
         const streakHtml = u.streak > 1 ? `<span class="streak-badge">🔥 ${u.streak}</span>` : '';
         const level = Math.floor(u.steps / 5000) + 1;
+
+        // Extract emojis for the mini badge display
+        const miniBadges = u.badges.map(b => b.split(' ')[0]).join('');
 
         return `
             <div class="row">
@@ -138,8 +165,11 @@ function render() {
                     <span style="font-weight:900;">${u.steps.toLocaleString()}</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--accent); margin-top: 6px;">
-                    <span>Level ${level}</span>
-                    <span style="opacity:0.8">Goal: ${nextGoalObj.name.split(' ')[1]} (${nextGoalObj.goal.toLocaleString()})</span>
+                    <div style="display:flex; align-items:center;">
+                        <span>Level ${level}</span>
+                        <div class="mini-badge-list">${miniBadges}</div>
+                    </div>
+                    <span style="opacity:0.8">Goal: ${nextGoalObj.goal.toLocaleString()}</span>
                 </div>
                 <div class="progress-container">
                     <div class="progress-bar" style="width:${percent}%"></div>
@@ -150,10 +180,12 @@ function render() {
     if(users.length > 0) html += `<button class="btn-secondary" style="width:100%; margin-top:10px;" onclick="shareLeaderboard()">📤 Share Rankings</button>`;
     list.innerHTML = html;
 
+    // Dropdown
     document.getElementById('user-select').innerHTML = '<option value="">-- Choose Friend --</option>' + 
         users.map((u, i) => `<option value="${i}">${u.name}</option>`).join('');
 
-    document.getElementById('badges-list').innerHTML = users.map(u => `
+    // Achievements Tab - Sorted by steps (same as leaderboard)
+    document.getElementById('badges-list').innerHTML = sorted.map(u => `
         <div class="card">
             <div style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
                 <b>${u.name}</b>
@@ -178,6 +210,7 @@ function showSection(id, btn) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(id).style.display = 'block';
     btn.classList.add('active');
+    currentSectionIndex = SECTIONS.indexOf(id);
 }
 
 render();
