@@ -95,3 +95,36 @@ nav {
     background: linear-gradient(90deg, var(--primary), var(--accent));
     border-radius: 100px;
 }
+
+/* Badge Item Styling */
+.badge-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.badge-item {
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.badge-item.unlocked {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.2), rgba(45, 212, 191, 0.2));
+    border-color: var(--primary);
+    box-shadow: 0 0 15px rgba(129, 140, 248, 0.2);
+}
+
+/* Make the Progress Bar glow */
+.progress-bar {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    box-shadow: 0 0 10px var(--primary);
+    border-radius: 100px;
+    height: 100%;
+}
