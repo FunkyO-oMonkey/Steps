@@ -34,6 +34,54 @@ function addSteps() {
     saveAndRefresh();
 }
 
+// ... (keep your existing users and GOALS array) ...
+
+function quickAdd(amount) {
+    const userIndex = document.getElementById('user-select').value;
+    if (userIndex === "") return alert("Select a friend first!");
+    
+    users[userIndex].steps += amount;
+    checkBadges(users[userIndex]);
+    saveAndRefresh();
+}
+
+// Updated HTML for the "Add Steps" section (Put this in your index.html)
+/* <section id="add-steps" style="display:none;">
+    <h2>Update Progress</h2>
+    <select id="user-select"></select>
+    
+    <div class="quick-add-grid">
+        <button class="btn-secondary" onclick="quickAdd(1000)">+1k</button>
+        <button class="btn-secondary" onclick="quickAdd(5000)">+5k</button>
+        <button class="btn-secondary" onclick="quickAdd(10000)">+10k</button>
+    </div>
+
+    <input type="number" id="step-amount" placeholder="Custom step amount">
+    <button onclick="addSteps()" style="width:100%">Add Custom</button>
+    
+    <hr style="margin: 20px 0; opacity: 0.1;">
+    <input type="text" id="new-user-name" placeholder="New Friend's Name">
+    <button onclick="addUser()" style="width:100%; background: var(--accent);">Create Profile</button>
+</section>
+*/
+
+function checkBadges(user) {
+    GOALS.forEach(g => {
+        if (user.steps >= g.goal && !user.badges.includes(g.name)) {
+            user.badges.push(g.name);
+            // Optional: You could add a modern notification here
+        }
+    });
+}
+
+function showSection(id, btn) {
+    document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById(id).style.display = 'block';
+    if(btn) btn.classList.add('active');
+}
+
 function render() {
     // 1. Render Leaderboard
     const list = document.getElementById('leaderboard-list');
