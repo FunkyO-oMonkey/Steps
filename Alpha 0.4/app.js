@@ -1,0 +1,155 @@
+let users = JSON.parse(localStorage.getItem('stepData')) || [];
+let globalRecord = JSON.parse(localStorage.getItem('globalRecord')) || { amount: 0, holder: "No one" };
+
+const GOALS = [
+    { name: "🚶 Early Bird", goal: 5000 },
+    { name: "🏃 10K Club", goal: 10000 },
+    { name: "🥉 Bronze", goal: 25000 },
+    { name: "🔥 Week Warrior", goal: 50000 },
+    { name: "🥈 Silver", goal: 75000 },
+    { name: "👑 Step Legend", goal: 100000 },
+    { name: "🥇 Gold", goal: 150000 },
+    { name: "💎 Diamond", goal: 200000 },
+    { name: "🚀 Orbit", goal: 300000 },
+    { name: "🌋 Volcano", goal: 400000 },
+    { name: "🌌 Galaxy", goal: 500000 },
+    { name: "🏆 Immortal", goal: 1000000 }
+];
+
+// --- LOGIC ---
+
+function updateRecord(amount, name) {
+    if (amount > globalRecord.amount) {
+        globalRecord = { amount: amount, holder: name };
+        localStorage.setItem('globalRecord', JSON.stringify(globalRecord));
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#facc15'] });
+    }
+}
+
+function updateStreak(user) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const oneDay = 24 * 60 * 60 * 1000;
+    if (!user.lastUpdate) { user.streak = 1; } else {
+        const lastDate = new Date(user.lastUpdate);
+        const lastDay = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate()).getTime();
+        if (today === lastDay + oneDay) { user.streak = (user.streak || 0) + 1; } 
+        else if (today > lastDay + oneDay) { user.streak = 1; }
+    }
+    user.lastUpdate = now.getTime();
+}
+
+// --- ACTIONS ---
+
+function addUser() {
+    const nameInput = document.getElementById('new-user-name');
+    if (!nameInput.value.trim()) return;
+    users.push({ name: nameInput.value.trim(), steps: 0, badges: [], streak: 0, lastUpdate: null });
+    nameInput.value = "";
+    saveAndRefresh();
+}
+
+function quickAdd(amount) {
+    const userIndex = document.getElementById('user-select').value;
+    if (userIndex === "") return alert("Select friend!");
+    const user = users[parseInt(userIndex)];
+    user.steps += amount;
+    updateRecord(amount, user.name);
+    updateStreak(user);
+    checkBadges(user);
+    saveAndRefresh();
+}
+
+function addSteps() {
+    const userIndex = document.getElementById('user-select').value;
+    const amount = parseInt(document.getElementById('step-amount').value);
+    if (userIndex === "" || isNaN(amount)) return alert("Select friend and amount!");
+    const user = users[parseInt(userIndex)];
+    user.steps += amount;
+    updateRecord(amount, user.name);
+    updateStreak(user);
+    checkBadges(user);
+    document.getElementById('step-amount').value = "";
+    saveAndRefresh();
+}
+
+function deleteUser() {
+    const userIndex = document.getElementById('user-select').value;
+    if (userIndex !== "" && confirm("Delete friend?")) {
+        users.splice(parseInt(userIndex), 1);
+        saveAndRefresh();
+    }
+}
+
+function checkBadges(user) {
+    let earned = false;
+    GOALS.forEach(g => {
+        if (user.steps >= g.goal && !user.badges.includes(g.name)) {
+            user.badges.push(g.name);
+            earned = true;
+        }
+    });
+    if (earned) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+}
+
+function saveAndRefresh() {
+    localStorage.setItem('stepData', JSON.stringify(users));
+    render();
+}
+
+function render() {
+    // Leaderboard
+    const list = document.getElementById('leaderboard-list');
+    const sorted = [...users].sort((a, b) => b.steps - a.steps);
+    
+    let leaderboardHtml = `<div class="record-box">⭐ Record Update: ${globalRecord.amount.toLocaleString()} by ${globalRecord.holder}</div>`;
+    
+    leaderboardHtml += sorted.map((u, i) => {
+        const nextGoal = GOALS.find(g => u.steps < g.goal) || GOALS[GOALS.length-1];
+        const percent = Math.min((u.steps / nextGoal.goal) * 100, 100);
+        const streakHtml = u.streak > 1 ? `<span class="streak-badge">🔥 ${u.streak}</span>` : '';
+        return `
+            <div class="row">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span><b>#${i+1}</b> ${u.name} ${streakHtml}</span>
+                    <span style="font-weight:900;">${u.steps.toLocaleString()}</span>
+                </div>
+                <div style="font-size:10px; color:var(--accent); margin-top:4px;">Lvl ${Math.floor(u.steps/5000)+1}</div>
+                <div class="progress-container"><div class="progress-bar" style="width:${percent}%"></div></div>
+            </div>`;
+    }).join('');
+    list.innerHTML = leaderboardHtml;
+
+    // Dropdown
+    document.getElementById('user-select').innerHTML = '<option value="">-- Choose Friend --</option>' + 
+        users.map((u, i) => `<option value="${i}">${u.name}</option>`).join('');
+
+    // Badges
+    document.getElementById('badges-list').innerHTML = users.map(u => `
+        <div class="card">
+            <div style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                <b>${u.name}</b>
+                <span style="font-size:0.7rem; color:var(--primary);">${u.badges.length}/${GOALS.length}</span>
+            </div>
+            <div class="badge-grid">
+                ${GOALS.map(g => {
+                    const unlocked = u.badges.includes(g.name);
+                    const parts = g.name.split(' ');
+                    return `
+                        <div class="badge-item ${unlocked ? 'unlocked' : ''}">
+                            <div class="badge-emoji">${parts[0]}</div>
+                            <div class="badge-info">${parts.slice(1).join(' ')}<br><span style="opacity:0.6;">${(g.goal>=1000000 ? (g.goal/1000000)+'M' : (g.goal/1000)+'k')}</span></div>
+                        </div>`;
+                }).join('')}
+            </div>
+        </div>`).join('');
+}
+
+function showSection(id, btn) {
+    document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).style.display = 'block';
+    btn.classList.add('active');
+}
+
+render();
