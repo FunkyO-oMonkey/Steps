@@ -1,0 +1,84 @@
+:root {
+    --bg: #121212;
+    --card: #1e1e1e;
+    --primary: #bb86fc;
+    --secondary: #03dac6;
+    --text: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding-bottom: 80px; /* Space for nav */
+}
+
+#app {
+    padding: 20px;
+    max-width: 500px;
+    margin: auto;
+}
+
+h2 { border-bottom: 2px solid var(--primary); padding-bottom: 8px; }
+
+/* Leaderboard Cards */
+.row {
+    background: var(--card);
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+/* Badge Grid */
+.badge-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.badge-item {
+    background: #2c2c2c;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid #444;
+}
+
+.unlocked { border-color: var(--secondary); color: var(--secondary); }
+
+/* Bottom Navigation */
+nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #252525;
+    display: flex;
+    justify-content: space-around;
+    padding: 15px;
+    border-top: 1px solid #333;
+}
+
+button {
+    background: var(--primary);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: black;
+    font-weight: bold;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #2c2c2c;
+    color: white;
+}
