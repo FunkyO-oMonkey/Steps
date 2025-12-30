@@ -64,6 +64,28 @@ function render() {
             </div>
         </div>
     `).join('');
+
+    // Replace the internal part of your sorted.map in the render() function:
+list.innerHTML = sorted.map((u, i) => {
+    // Find the next goal the user hasn't reached yet
+    const nextGoal = GOALS.find(g => u.steps < g.goal) || GOALS[GOALS.length - 1];
+    const percent = Math.min((u.steps / nextGoal.goal) * 100, 100);
+
+    return `
+        <div class="row" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+                <span><b>#${i+1}</b> ${u.name}</span>
+                <span>${u.steps.toLocaleString()} steps</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: ${percent}%"></div>
+            </div>
+            <small class="next-goal-text">
+                ${u.steps >= 100000 ? '👑 Max Level' : `Next Badge: ${nextGoal.name} (${nextGoal.goal.toLocaleString()})`}
+            </small>
+        </div>
+    `;
+}).join('');
 }
 
 function saveAndRefresh() {
@@ -75,8 +97,5 @@ function showSection(id) {
     document.querySelectorAll('section').forEach(s => s.style.display = 'none');
     document.getElementById(id).style.display = 'block';
 }
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js')
-    .then(() => console.log("Service Worker Registered"));
-}
+
 render();
