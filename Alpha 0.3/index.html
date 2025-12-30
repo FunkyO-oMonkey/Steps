@@ -35,13 +35,19 @@
 
                 <label>MANUAL AMOUNT</label>
                 <input type="number" id="step-amount" placeholder="Enter steps...">
-                <button class="btn-primary" onclick="addSteps()">Add Custom</button>
+                <button class="btn-primary" onclick="addSteps()" style="width:100%">Add Custom</button>
             </div>
 
             <div class="card" style="margin-top: 20px;">
                 <label>ADD NEW FRIEND</label>
                 <input type="text" id="new-user-name" placeholder="Name...">
-                <button class="btn-accent" onclick="addUser()">Create Profile</button>
+                <button class="btn-accent" onclick="addUser()" style="width:100%">Create Profile</button>
+                
+                <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                    <label style="color: #ef4444;">DANGER ZONE</label>
+                    <button class="btn-secondary" style="width:100%; color: #ef4444; border-color: #ef4444; margin-top: 10px;" onclick="deleteUser()">Delete Selected Friend</button>
+                    <button class="btn-secondary" style="width:100%; margin-top: 10px; font-size: 10px; opacity: 0.5;" onclick="resetAllData()">Reset Entire Season</button>
+                </div>
             </div>
         </section>
 
