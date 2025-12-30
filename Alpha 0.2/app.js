@@ -35,25 +35,18 @@ function addSteps() {
 }
 
 function quickAdd(amount) {
-    const userSelect = document.getElementById('user-select');
-    const userIndex = userSelect.value;
-    
-    if (userIndex === "" || userIndex === null) {
+    const userIndex = document.getElementById('user-select').value;
+    if (userIndex === "") {
+        // Short vibration for error
         if (navigator.vibrate) navigator.vibrate(100);
-        alert("Please select a friend from the dropdown first!");
-        return;
+        return alert("Select a friend first!");
     }
     
-    // Haptic feedback for Android
+    // Physical "click" feel (vibrate for 40ms)
     if (navigator.vibrate) navigator.vibrate(40);
 
-    // Update the steps
     users[userIndex].steps += amount;
-    
-    // Check for badges & trigger confetti
     checkBadges(users[userIndex]);
-    
-    // Save to LocalStorage and update UI
     saveAndRefresh();
 }
 
@@ -81,8 +74,22 @@ function checkBadges(user) {
     GOALS.forEach(g => {
         if (user.steps >= g.goal && !user.badges.includes(g.name)) {
             user.badges.push(g.name);
-            // Optional: You could add a modern notification here
+            
+            // CELEBRATION!
+            triggerCelebration();
+            
+            // Long vibration for achievement
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
         }
+    });
+}
+
+function triggerCelebration() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#818cf8', '#2dd4bf', '#ffffff']
     });
 }
 
