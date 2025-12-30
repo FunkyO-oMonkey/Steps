@@ -16,13 +16,13 @@ const GOALS = [
     { name: "🏆 Immortal", goal: 1000000 }
 ];
 
-// --- LOGIC ---
+// --- CORE FUNCTIONS ---
 
 function updateRecord(amount, name) {
     if (amount > globalRecord.amount) {
         globalRecord = { amount: amount, holder: name };
         localStorage.setItem('globalRecord', JSON.stringify(globalRecord));
-        confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 }, colors: ['#facc15'] });
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
     }
 }
 
@@ -38,8 +38,6 @@ function updateStreak(user) {
     }
     user.lastUpdate = now.getTime();
 }
-
-// --- ACTIONS ---
 
 function addUser() {
     const nameInput = document.getElementById('new-user-name');
@@ -115,22 +113,24 @@ function saveAndRefresh() {
     render();
 }
 
+// --- RENDER LOGIC ---
+
 function render() {
-    // 1. Leaderboard
     const list = document.getElementById('leaderboard-list');
     const sorted = [...users].sort((a, b) => b.steps - a.steps);
+    
     let html = `<div class="record-box">⭐ Record Update: ${globalRecord.amount.toLocaleString()} by ${globalRecord.holder}</div>`;
     
     html += sorted.map((u, i) => {
+        // Find the next goal target
         const nextGoalObj = GOALS.find(g => u.steps < g.goal) || GOALS[GOALS.length - 1];
-        const prevGoalValue = [...GOALS].reverse().find(g => u.steps >= g.goal)?.goal || 0;
         
-        // Progress bar fills based on the distance between current milestone and next milestone
-        const stepsInCurrentTier = u.steps - prevGoalValue;
-        const tierDistance = nextGoalObj.goal - prevGoalValue;
-        const percent = Math.min((stepsInCurrentTier / tierDistance) * 100, 100);
+        // SIMPLE LINEAR MATH: Current Steps / Next Goal
+        const percent = Math.min((u.steps / nextGoalObj.goal) * 100, 100);
 
         const streakHtml = u.streak > 1 ? `<span class="streak-badge">🔥 ${u.streak}</span>` : '';
+        const level = Math.floor(u.steps / 5000) + 1;
+
         return `
             <div class="row">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -138,20 +138,21 @@ function render() {
                     <span style="font-weight:900;">${u.steps.toLocaleString()}</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--accent); margin-top: 6px;">
-                    <span>Level ${Math.floor(u.steps/5000)+1}</span>
-                    <span style="opacity:0.8">Next: ${nextGoalObj.name.split(' ')[1]}</span>
+                    <span>Level ${level}</span>
+                    <span style="opacity:0.8">Goal: ${nextGoalObj.name.split(' ')[1]} (${nextGoalObj.goal.toLocaleString()})</span>
                 </div>
-                <div class="progress-container"><div class="progress-bar" style="width:${percent}%"></div></div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width:${percent}%"></div>
+                </div>
             </div>`;
     }).join('');
+
     if(users.length > 0) html += `<button class="btn-secondary" style="width:100%; margin-top:10px;" onclick="shareLeaderboard()">📤 Share Rankings</button>`;
     list.innerHTML = html;
 
-    // 2. Dropdown
     document.getElementById('user-select').innerHTML = '<option value="">-- Choose Friend --</option>' + 
         users.map((u, i) => `<option value="${i}">${u.name}</option>`).join('');
 
-    // 3. Badges
     document.getElementById('badges-list').innerHTML = users.map(u => `
         <div class="card">
             <div style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
