@@ -75,5 +75,8 @@ function showSection(id) {
     document.querySelectorAll('section').forEach(s => s.style.display = 'none');
     document.getElementById(id).style.display = 'block';
 }
-
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log("Service Worker Registered"));
+}
 render();
