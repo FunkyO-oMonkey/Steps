@@ -1,4 +1,4 @@
-// Initialization
+// Data Persistence
 let users = JSON.parse(localStorage.getItem('stepData')) || [];
 
 const GOALS = [
@@ -8,49 +8,18 @@ const GOALS = [
     { name: "👑 Step Legend", goal: 100000 }
 ];
 
-// --- USER MANAGEMENT ---
+// --- USER ACTIONS ---
 
 function addUser() {
     const nameInput = document.getElementById('new-user-name');
     const name = nameInput.value.trim();
     if (!name) return alert("Please enter a name");
     
-    users.push({ 
-        name: name, 
-        steps: 0, 
-        badges: [] 
-    });
-    
+    users.push({ name: name, steps: 0, badges: [] });
     nameInput.value = "";
     saveAndRefresh();
     if (navigator.vibrate) navigator.vibrate(50);
 }
-
-function deleteUser() {
-    const userIndex = document.getElementById('user-select').value;
-    
-    if (userIndex === "" || userIndex === null) {
-        alert("Please select a friend from the dropdown first!");
-        return;
-    }
-
-    const userName = users[parseInt(userIndex)].name;
-    if (confirm(`Are you sure you want to delete ${userName}?`)) {
-        users.splice(parseInt(userIndex), 1);
-        saveAndRefresh();
-        if (navigator.vibrate) navigator.vibrate(100);
-    }
-}
-
-function resetAllData() {
-    if (confirm("⚠️ DELETE EVERYTHING? This will remove all friends and all steps forever.")) {
-        users = [];
-        saveAndRefresh();
-        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-    }
-}
-
-// --- STEP UPDATES ---
 
 function quickAdd(amount) {
     const userIndex = document.getElementById('user-select').value;
@@ -68,7 +37,7 @@ function addSteps() {
     const amount = parseInt(amountInput.value);
 
     if (userIndex === "") return alert("Please select a friend first!");
-    if (isNaN(amount) || amount <= 0) return alert("Please enter a valid number of steps");
+    if (isNaN(amount) || amount <= 0) return alert("Enter a valid number of steps");
 
     users[parseInt(userIndex)].steps += amount;
     checkBadges(users[parseInt(userIndex)]);
@@ -77,24 +46,39 @@ function addSteps() {
     if (navigator.vibrate) navigator.vibrate(60);
 }
 
-// --- LOGIC ---
+function deleteUser() {
+    const userIndex = document.getElementById('user-select').value;
+    if (userIndex === "") return alert("Select a friend to delete!");
+
+    const userName = users[parseInt(userIndex)].name;
+    if (confirm(`Delete ${userName}? This cannot be undone.`)) {
+        users.splice(parseInt(userIndex), 1);
+        saveAndRefresh();
+        if (navigator.vibrate) navigator.vibrate(100);
+    }
+}
+
+function resetAllData() {
+    if (confirm("⚠️ RESET EVERYTHING? All friends and steps will be deleted.")) {
+        users = [];
+        saveAndRefresh();
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    }
+}
+
+// --- APP LOGIC ---
 
 function checkBadges(user) {
-    let newBadgeEarned = false;
+    let earned = false;
     GOALS.forEach(g => {
         if (user.steps >= g.goal && !user.badges.includes(g.name)) {
             user.badges.push(g.name);
-            newBadgeEarned = true;
+            earned = true;
         }
     });
 
-    if (newBadgeEarned) {
-        confetti({
-            particleCount: 150,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#818cf8', '#2dd4bf', '#ffffff']
-        });
+    if (earned) {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
     }
 }
@@ -105,12 +89,12 @@ function saveAndRefresh() {
 }
 
 function render() {
-    // 1. Leaderboard
+    // 1. Leaderboard Rendering
     const list = document.getElementById('leaderboard-list');
     const sorted = [...users].sort((a, b) => b.steps - a.steps);
     
     if (users.length === 0) {
-        list.innerHTML = '<p style="text-align:center; opacity:0.5;">No friends added yet. Go to the "+" tab!</p>';
+        list.innerHTML = '<p style="text-align:center; opacity:0.5; margin-top:40px;">No friends yet.<br>Go to the "+" tab to add some!</p>';
     } else {
         list.innerHTML = sorted.map((u, i) => {
             const nextGoal = GOALS.find(g => u.steps < g.goal) || GOALS[GOALS.length - 1];
@@ -120,8 +104,8 @@ function render() {
             return `
                 <div class="row">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span><b>#${i+1}</b> ${u.name} <small style="color:var(--accent); margin-left:5px;">Lvl ${level}</small></span>
-                        <span style="font-weight:bold;">${u.steps.toLocaleString()}</span>
+                        <span><b>#${i+1}</b> ${u.name} <small style="color:var(--accent); margin-left:4px;">Lvl ${level}</small></span>
+                        <span style="font-weight:900;">${u.steps.toLocaleString()}</span>
                     </div>
                     <div class="progress-container">
                         <div class="progress-bar" style="width:${percent}%"></div>
@@ -139,20 +123,31 @@ function render() {
     });
     select.innerHTML = options;
 
-    // 3. Badges Update
+    // 3. Achievements Rendering (With Text)
     const badgeList = document.getElementById('badges-list');
     if (users.length === 0) {
-        badgeList.innerHTML = '<p style="text-align:center; opacity:0.5;">Add friends to see achievements.</p>';
+        badgeList.innerHTML = '<p style="text-align:center; opacity:0.5;">Add friends to track badges.</p>';
     } else {
         badgeList.innerHTML = users.map(u => `
-            <div class="card" style="margin-bottom:15px;">
-                <div style="margin-bottom:10px"><b>${u.name}</b> Achievements</div>
+            <div class="card" style="margin-bottom:20px;">
+                <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                    <b style="font-size: 1.1rem;">${u.name}</b>
+                    <span style="font-size: 0.7rem; font-weight:800; color: var(--primary);">${u.badges.length}/${GOALS.length} BADGES</span>
+                </div>
                 <div class="badge-grid">
-                    ${GOALS.map(g => `
-                        <div class="badge-item ${u.badges.includes(g.name) ? 'unlocked' : ''}">
-                            ${g.name.split(' ')[0]}
-                        </div>
-                    `).join('')}
+                    ${GOALS.map(g => {
+                        const isUnlocked = u.badges.includes(g.name);
+                        const parts = g.name.split(' ');
+                        const emoji = parts[0];
+                        const label = parts.slice(1).join(' ');
+                        
+                        return `
+                            <div class="badge-item ${isUnlocked ? 'unlocked' : ''}">
+                                <div class="badge-emoji">${emoji}</div>
+                                <div class="badge-info">${label}<br><span style="opacity:0.6; font-weight:normal;">${(g.goal/1000)}k</span></div>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
             </div>
         `).join('');
@@ -167,5 +162,5 @@ function showSection(id, btn) {
     if (navigator.vibrate) navigator.vibrate(15);
 }
 
-// Initial Run
+// Initial Render
 render();
