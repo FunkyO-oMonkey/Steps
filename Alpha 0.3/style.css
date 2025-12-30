@@ -1,0 +1,85 @@
+:root {
+    --bg: #0f172a;
+    --card: rgba(30, 41, 59, 0.7);
+    --primary: #818cf8;
+    --accent: #2dd4bf;
+    --text: #f8fafc;
+}
+
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: radial-gradient(circle at top right, #1e1b4b, var(--bg));
+    color: var(--text);
+    margin: 0;
+    min-height: 100vh;
+    padding-bottom: 100px;
+}
+
+#app { padding: 20px; max-width: 450px; margin: auto; }
+
+h1 span { color: var(--primary); font-size: 1rem; vertical-align: middle; }
+
+.section-title { font-size: 1.4rem; margin-bottom: 20px; color: var(--primary); }
+
+.card {
+    background: var(--card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 24px;
+}
+
+label { font-size: 11px; font-weight: bold; color: #94a3b8; letter-spacing: 1px; }
+
+/* Form Elements */
+select, input {
+    width: 100%;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 12px;
+    border-radius: 12px;
+    color: white;
+    margin: 8px 0 15px 0;
+    box-sizing: border-box;
+}
+
+.quick-add-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 10px 0 20px 0; }
+
+button { border: none; cursor: pointer; transition: 0.2s; font-weight: bold; }
+
+.btn-primary { background: var(--primary); color: white; padding: 15px; border-radius: 12px; }
+.btn-accent { background: var(--accent); color: #0f172a; padding: 15px; border-radius: 12px; }
+.btn-secondary { background: rgba(255,255,255,0.05); color: white; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+
+/* Leaderboard Row */
+.row {
+    background: var(--card);
+    margin-bottom: 12px;
+    padding: 16px;
+    border-radius: 20px;
+}
+
+.progress-container { background: rgba(255,255,255,0.1); height: 6px; border-radius: 10px; margin-top: 10px; }
+.progress-bar { background: linear-gradient(90deg, var(--primary), var(--accent)); height: 100%; border-radius: 10px; transition: width 0.5s; }
+
+/* Navigation */
+nav {
+    position: fixed;
+    bottom: 20px; left: 20px; right: 20px;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(20px);
+    display: flex; justify-content: space-around;
+    padding: 10px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-btn { background: transparent; font-size: 1.5rem; opacity: 0.4; }
+.nav-btn.active { opacity: 1; transform: scale(1.2); }
+
+/* Badge Grid */
+.badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+.badge-item { 
+    background: rgba(255,255,255,0.05); border-radius: 12px; aspect-ratio: 1/1;
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    filter: grayscale(1); opacity: 0.2;
+}
+.badge-item.unlocked { filter: grayscale(0); opacity: 1; background: rgba(129, 140, 248, 0.1); border: 1px solid var(--primary); }
