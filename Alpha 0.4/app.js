@@ -19,32 +19,33 @@ const GOALS = [
 const SECTIONS = ['leaderboard', 'add-steps', 'badges'];
 let currentSectionIndex = 0;
 
-// --- SWIPE LOGIC ---
+// --- SWIPE & GESTURE LOGIC ---
 let touchstartX = 0;
 let touchendX = 0;
 
 function handleGesture() {
-    if (touchendX < touchstartX - 70) switchTab(1); // Swipe Left -> Next Tab
-    if (touchendX > touchstartX + 70) switchTab(-1); // Swipe Right -> Prev Tab
+    const swipeDistance = 70;
+    if (touchendX < touchstartX - swipeDistance) switchTab(1); // Swipe Left
+    if (touchendX > touchstartX + swipeDistance) switchTab(-1); // Swipe Right
 }
 
 function switchTab(direction) {
     let nextIndex = currentSectionIndex + direction;
     if (nextIndex >= 0 && nextIndex < SECTIONS.length) {
-        currentSectionIndex = nextIndex;
-        const targetId = SECTIONS[currentSectionIndex];
-        const targetBtn = document.querySelectorAll('.nav-btn')[currentSectionIndex];
+        if (navigator.vibrate) navigator.vibrate(10); // Subtle haptic feedback
+        const targetId = SECTIONS[nextIndex];
+        const targetBtn = document.querySelectorAll('.nav-btn')[nextIndex];
         showSection(targetId, targetBtn);
     }
 }
 
-document.addEventListener('touchstart', e => touchstartX = e.changedTouches[0].screenX);
+document.addEventListener('touchstart', e => touchstartX = e.changedTouches[0].screenX, {passive: true});
 document.addEventListener('touchend', e => {
     touchendX = e.changedTouches[0].screenX;
     handleGesture();
-});
+}, {passive: true});
 
-// --- CORE LOGIC ---
+// --- CORE ACTIONS ---
 
 function updateRecord(amount, name) {
     if (amount > globalRecord.amount) {
@@ -89,7 +90,7 @@ function quickAdd(amount) {
 function addSteps() {
     const userIndex = document.getElementById('user-select').value;
     const amount = parseInt(document.getElementById('step-amount').value);
-    if (userIndex === "" || isNaN(amount)) return alert("Select friend and amount!");
+    if (userIndex === "" || isNaN(amount)) return alert("Select friend!");
     const user = users[parseInt(userIndex)];
     user.steps += amount;
     updateRecord(amount, user.name);
@@ -133,7 +134,7 @@ function shareLeaderboard() {
     sorted.forEach((u, i) => text += `${i+1}. ${u.name}: ${u.steps.toLocaleString()} steps\n`);
     text += `\n⭐ Record: ${globalRecord.amount.toLocaleString()} by ${globalRecord.holder}`;
     if (navigator.share) { navigator.share({ title: 'StepBuddy', text: text }); } 
-    else { navigator.clipboard.writeText(text); alert("Copied to clipboard!"); }
+    else { navigator.clipboard.writeText(text); alert("Copied!"); }
 }
 
 function saveAndRefresh() {
@@ -141,7 +142,7 @@ function saveAndRefresh() {
     render();
 }
 
-// --- RENDER LOGIC ---
+// --- RENDERING ---
 
 function render() {
     const list = document.getElementById('leaderboard-list');
@@ -154,8 +155,6 @@ function render() {
         const percent = Math.min((u.steps / nextGoalObj.goal) * 100, 100);
         const streakHtml = u.streak > 1 ? `<span class="streak-badge">🔥 ${u.streak}</span>` : '';
         const level = Math.floor(u.steps / 5000) + 1;
-
-        // Extract emojis for the mini badge display
         const miniBadges = u.badges.map(b => b.split(' ')[0]).join('');
 
         return `
@@ -171,20 +170,16 @@ function render() {
                     </div>
                     <span style="opacity:0.8">Goal: ${nextGoalObj.goal.toLocaleString()}</span>
                 </div>
-                <div class="progress-container">
-                    <div class="progress-bar" style="width:${percent}%"></div>
-                </div>
+                <div class="progress-container"><div class="progress-bar" style="width:${percent}%"></div></div>
             </div>`;
     }).join('');
 
     if(users.length > 0) html += `<button class="btn-secondary" style="width:100%; margin-top:10px;" onclick="shareLeaderboard()">📤 Share Rankings</button>`;
     list.innerHTML = html;
 
-    // Dropdown
     document.getElementById('user-select').innerHTML = '<option value="">-- Choose Friend --</option>' + 
         users.map((u, i) => `<option value="${i}">${u.name}</option>`).join('');
 
-    // Achievements Tab - Sorted by steps (same as leaderboard)
     document.getElementById('badges-list').innerHTML = sorted.map(u => `
         <div class="card">
             <div style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
@@ -208,7 +203,15 @@ function render() {
 function showSection(id, btn) {
     document.querySelectorAll('section').forEach(s => s.style.display = 'none');
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).style.display = 'block';
+    
+    const target = document.getElementById(id);
+    target.style.display = 'block';
+    
+    // Reset animation so it plays again
+    target.style.animation = 'none';
+    target.offsetHeight; /* Trigger reflow */
+    target.style.animation = null; 
+
     btn.classList.add('active');
     currentSectionIndex = SECTIONS.indexOf(id);
 }
