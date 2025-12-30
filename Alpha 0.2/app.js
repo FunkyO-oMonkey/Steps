@@ -34,14 +34,26 @@ function addSteps() {
     saveAndRefresh();
 }
 
-// ... (keep your existing users and GOALS array) ...
-
 function quickAdd(amount) {
-    const userIndex = document.getElementById('user-select').value;
-    if (userIndex === "") return alert("Select a friend first!");
+    const userSelect = document.getElementById('user-select');
+    const userIndex = userSelect.value;
     
+    if (userIndex === "" || userIndex === null) {
+        if (navigator.vibrate) navigator.vibrate(100);
+        alert("Please select a friend from the dropdown first!");
+        return;
+    }
+    
+    // Haptic feedback for Android
+    if (navigator.vibrate) navigator.vibrate(40);
+
+    // Update the steps
     users[userIndex].steps += amount;
+    
+    // Check for badges & trigger confetti
     checkBadges(users[userIndex]);
+    
+    // Save to LocalStorage and update UI
     saveAndRefresh();
 }
 
