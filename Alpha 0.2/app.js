@@ -112,6 +112,23 @@ function render() {
             </div>
         </div>
     `).join('');
+    // Inside render() for badges:
+badgeList.innerHTML = users.map(u => `
+    <div class="row">
+        <h3 style="margin: 0 0 10px 0">${u.name}</h3>
+        <div class="badge-grid">
+            ${GOALS.map(g => {
+                const isUnlocked = u.badges.includes(g.name);
+                return `
+                    <div class="badge-item" style="opacity: ${isUnlocked ? 1 : 0.3}; filter: grayscale(${isUnlocked ? 0 : 1})">
+                        <div style="font-size: 1.5rem">${g.name.split(' ')[0]}</div>
+                        <div style="font-size: 0.7rem">${g.name.split(' ')[1]}</div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    </div>
+`).join('');
 
     // Replace the internal part of your sorted.map in the render() function:
 list.innerHTML = sorted.map((u, i) => {
