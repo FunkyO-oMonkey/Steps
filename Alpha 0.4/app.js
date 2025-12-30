@@ -19,20 +19,19 @@ const GOALS = [
 const SECTIONS = ['leaderboard', 'add-steps', 'badges'];
 let currentSectionIndex = 0;
 
-// --- SWIPE & GESTURE LOGIC ---
+// --- SWIPE LOGIC ---
 let touchstartX = 0;
 let touchendX = 0;
 
 function handleGesture() {
-    const swipeDistance = 70;
-    if (touchendX < touchstartX - swipeDistance) switchTab(1); // Swipe Left
-    if (touchendX > touchstartX + swipeDistance) switchTab(-1); // Swipe Right
+    if (touchendX < touchstartX - 70) switchTab(1); // Swipe Left
+    if (touchendX > touchstartX + 70) switchTab(-1); // Swipe Right
 }
 
 function switchTab(direction) {
     let nextIndex = currentSectionIndex + direction;
     if (nextIndex >= 0 && nextIndex < SECTIONS.length) {
-        if (navigator.vibrate) navigator.vibrate(10); // Subtle haptic feedback
+        if (navigator.vibrate) navigator.vibrate(15);
         const targetId = SECTIONS[nextIndex];
         const targetBtn = document.querySelectorAll('.nav-btn')[nextIndex];
         showSection(targetId, targetBtn);
@@ -46,7 +45,6 @@ document.addEventListener('touchend', e => {
 }, {passive: true});
 
 // --- CORE ACTIONS ---
-
 function updateRecord(amount, name) {
     if (amount > globalRecord.amount) {
         globalRecord = { amount: amount, holder: name };
@@ -142,12 +140,9 @@ function saveAndRefresh() {
     render();
 }
 
-// --- RENDERING ---
-
 function render() {
     const list = document.getElementById('leaderboard-list');
     const sorted = [...users].sort((a, b) => b.steps - a.steps);
-    
     let html = `<div class="record-box">⭐ Record Update: ${globalRecord.amount.toLocaleString()} by ${globalRecord.holder}</div>`;
     
     html += sorted.map((u, i) => {
@@ -207,9 +202,9 @@ function showSection(id, btn) {
     const target = document.getElementById(id);
     target.style.display = 'block';
     
-    // Reset animation so it plays again
+    // Restart animation
     target.style.animation = 'none';
-    target.offsetHeight; /* Trigger reflow */
+    target.offsetHeight; 
     target.style.animation = null; 
 
     btn.classList.add('active');
