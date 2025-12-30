@@ -35,18 +35,25 @@ function addSteps() {
 }
 
 function quickAdd(amount) {
-    const userIndex = document.getElementById('user-select').value;
-    if (userIndex === "") {
-        // Short vibration for error
+    const userSelect = document.getElementById('user-select');
+    const userIndex = userSelect.value;
+    
+    if (userIndex === "" || userIndex === null) {
         if (navigator.vibrate) navigator.vibrate(100);
-        return alert("Select a friend first!");
+        alert("Please select a friend from the dropdown first!");
+        return;
     }
     
-    // Physical "click" feel (vibrate for 40ms)
+    // Haptic feedback for Android
     if (navigator.vibrate) navigator.vibrate(40);
 
+    // Update the steps
     users[userIndex].steps += amount;
+    
+    // Check for badges & trigger confetti
     checkBadges(users[userIndex]);
+    
+    // Save to LocalStorage and update UI
     saveAndRefresh();
 }
 
