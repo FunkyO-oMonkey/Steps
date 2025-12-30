@@ -81,6 +81,15 @@ function deleteUser() {
     }
 }
 
+function resetAllData() {
+    if (confirm("Reset everything?")) {
+        users = [];
+        globalRecord = { amount: 0, holder: "No one" };
+        localStorage.clear();
+        saveAndRefresh();
+    }
+}
+
 function checkBadges(user) {
     let earned = false;
     GOALS.forEach(g => {
@@ -92,21 +101,35 @@ function checkBadges(user) {
     if (earned) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
 }
 
+function shareLeaderboard() {
+    const sorted = [...users].sort((a, b) => b.steps - a.steps);
+    let text = "🏆 STEPBUDDY RANKINGS\n\n";
+    sorted.forEach((u, i) => text += `${i+1}. ${u.name}: ${u.steps.toLocaleString()} steps\n`);
+    text += `\n⭐ Record: ${globalRecord.amount.toLocaleString()} by ${globalRecord.holder}`;
+    if (navigator.share) { navigator.share({ title: 'StepBuddy', text: text }); } 
+    else { navigator.clipboard.writeText(text); alert("Copied to clipboard!"); }
+}
+
 function saveAndRefresh() {
     localStorage.setItem('stepData', JSON.stringify(users));
     render();
 }
 
 function render() {
-    // Leaderboard
+    // 1. Leaderboard
     const list = document.getElementById('leaderboard-list');
     const sorted = [...users].sort((a, b) => b.steps - a.steps);
+    let html = `<div class="record-box">⭐ Record Update: ${globalRecord.amount.toLocaleString()} by ${globalRecord.holder}</div>`;
     
-    let leaderboardHtml = `<div class="record-box">⭐ Record Update: ${globalRecord.amount.toLocaleString()} by ${globalRecord.holder}</div>`;
-    
-    leaderboardHtml += sorted.map((u, i) => {
-        const nextGoal = GOALS.find(g => u.steps < g.goal) || GOALS[GOALS.length-1];
-        const percent = Math.min((u.steps / nextGoal.goal) * 100, 100);
+    html += sorted.map((u, i) => {
+        const nextGoalObj = GOALS.find(g => u.steps < g.goal) || GOALS[GOALS.length - 1];
+        const prevGoalValue = [...GOALS].reverse().find(g => u.steps >= g.goal)?.goal || 0;
+        
+        // Progress bar fills based on the distance between current milestone and next milestone
+        const stepsInCurrentTier = u.steps - prevGoalValue;
+        const tierDistance = nextGoalObj.goal - prevGoalValue;
+        const percent = Math.min((stepsInCurrentTier / tierDistance) * 100, 100);
+
         const streakHtml = u.streak > 1 ? `<span class="streak-badge">🔥 ${u.streak}</span>` : '';
         return `
             <div class="row">
@@ -114,22 +137,26 @@ function render() {
                     <span><b>#${i+1}</b> ${u.name} ${streakHtml}</span>
                     <span style="font-weight:900;">${u.steps.toLocaleString()}</span>
                 </div>
-                <div style="font-size:10px; color:var(--accent); margin-top:4px;">Lvl ${Math.floor(u.steps/5000)+1}</div>
+                <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--accent); margin-top: 6px;">
+                    <span>Level ${Math.floor(u.steps/5000)+1}</span>
+                    <span style="opacity:0.8">Next: ${nextGoalObj.name.split(' ')[1]}</span>
+                </div>
                 <div class="progress-container"><div class="progress-bar" style="width:${percent}%"></div></div>
             </div>`;
     }).join('');
-    list.innerHTML = leaderboardHtml;
+    if(users.length > 0) html += `<button class="btn-secondary" style="width:100%; margin-top:10px;" onclick="shareLeaderboard()">📤 Share Rankings</button>`;
+    list.innerHTML = html;
 
-    // Dropdown
+    // 2. Dropdown
     document.getElementById('user-select').innerHTML = '<option value="">-- Choose Friend --</option>' + 
         users.map((u, i) => `<option value="${i}">${u.name}</option>`).join('');
 
-    // Badges
+    // 3. Badges
     document.getElementById('badges-list').innerHTML = users.map(u => `
         <div class="card">
             <div style="margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
                 <b>${u.name}</b>
-                <span style="font-size:0.7rem; color:var(--primary);">${u.badges.length}/${GOALS.length}</span>
+                <span style="font-size:0.7rem; color:var(--primary); font-weight:800;">${u.badges.length}/${GOALS.length}</span>
             </div>
             <div class="badge-grid">
                 ${GOALS.map(g => {
@@ -138,7 +165,7 @@ function render() {
                     return `
                         <div class="badge-item ${unlocked ? 'unlocked' : ''}">
                             <div class="badge-emoji">${parts[0]}</div>
-                            <div class="badge-info">${parts.slice(1).join(' ')}<br><span style="opacity:0.6;">${(g.goal>=1000000 ? (g.goal/1000000)+'M' : (g.goal/1000)+'k')}</span></div>
+                            <div class="badge-info">${parts.slice(1).join(' ')}<br><span style="opacity:0.6;">${(g.goal>=1000000 ? '1M' : (g.goal/1000)+'k')}</span></div>
                         </div>`;
                 }).join('')}
             </div>
