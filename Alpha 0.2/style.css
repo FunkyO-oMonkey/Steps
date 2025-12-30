@@ -82,3 +82,28 @@ input, select {
     background: #2c2c2c;
     color: white;
 }
+
+/* Progress Bar Container */
+.progress-container {
+    background: #333;
+    border-radius: 10px;
+    height: 10px;
+    width: 100%;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+/* The actual bar */
+.progress-bar {
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    height: 100%;
+    width: 0%; /* Will be updated by JS */
+    transition: width 0.5s ease-in-out;
+}
+
+.next-goal-text {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-top: 4px;
+    display: block;
+}
