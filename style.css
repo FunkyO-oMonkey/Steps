@@ -110,3 +110,22 @@ select, input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba
     margin-bottom: 10px;
     display: block;
 }
+
+/* Team Card */
+.group-total-card {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.2), rgba(45, 212, 191, 0.2));
+    border: 2px solid var(--primary);
+    padding: 15px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.group-total-val {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--text);
+    text-shadow: 0 0 10px var(--primary);
+}
