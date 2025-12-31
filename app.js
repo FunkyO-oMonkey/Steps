@@ -93,7 +93,7 @@ function render() {
             <span class="group-total-val">${totalSteps.toLocaleString()}</span>
             <span style="font-size: 10px; opacity: 0.8;">Total Steps</span>
         </div>
-        <div class="record-box">⭐ Leading Personal Best: ${globalRecord.amount.toLocaleString()} by ${globalRecord.holder} ⭐</div>
+        <div class="record-box">⭐ Record Personal Best: <b>${globalRecord.amount.toLocaleString()}<b> by ${globalRecord.holder} ⭐</div>
     `;
     
     html += sorted.map((u, i) => {
