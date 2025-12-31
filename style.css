@@ -22,13 +22,21 @@ body {
 #app { padding: 20px; max-width: 450px; margin: auto; }
 
 /* Transition Animation */
-section {
-    animation: slideIn 0.35s cubic-bezier(0.25, 1, 0.5, 1);
-    will-change: transform, opacity;
+.slide-from-right {
+    animation: slideRight 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(30px); }
+.slide-from-left {
+    animation: slideLeft 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes slideRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideLeft {
+    from { opacity: 0; transform: translateX(-40px); }
     to { opacity: 1; transform: translateX(0); }
 }
 
