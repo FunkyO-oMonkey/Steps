@@ -89,11 +89,11 @@ function render() {
 
     let html = `
         <div class="group-total-card">
-            <span style="font-size: 11px; text-transform: uppercase; color: var(--accent);">Combined Group Effort</span>
+            <span style="font-size: 11px; text-transform: uppercase; color: var(--accent);">Combined Effort</span>
             <span class="group-total-val">${totalSteps.toLocaleString()}</span>
-            <span style="font-size: 10px; opacity: 0.8;">Total Steps Taken</span>
+            <span style="font-size: 10px; opacity: 0.8;">Total Steps</span>
         </div>
-        <div class="record-box">⭐ Record Update: ${globalRecord.amount.toLocaleString()} by ${globalRecord.holder}</div>
+        <div class="record-box">⭐ Leading Personal Best: ${globalRecord.amount.toLocaleString()} by ${globalRecord.holder} ⭐</div>
     `;
     
     html += sorted.map((u, i) => {
@@ -212,7 +212,7 @@ function showSection(id, btn, animClass = 'slide-from-right') {
     // Apply the specific direction class
     target.classList.add(animClass);
 
-    // Update Nav Buttons
+    // Nav Buttons
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     
