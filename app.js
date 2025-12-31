@@ -159,7 +159,7 @@ function render() {
         </div>`).join('');
 }
 
-// Helper functions (Keeping from before)
+// Helper functions
 function updateRecord(amount, name) {
     if (amount > globalRecord.amount) {
         globalRecord = { amount, holder: name };
@@ -185,15 +185,37 @@ function saveAndRefresh() {
     render();
 }
 
-function showSection(id, btn) {
-    document.querySelectorAll('section').forEach(s => s.style.display = 'none');
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+function switchTab(direction) {
+    let nextIndex = currentSectionIndex + direction;
+    if (nextIndex >= 0 && nextIndex < SECTIONS.length) {
+        if (navigator.vibrate) navigator.vibrate(15);
+        
+        // Determine animation direction
+        const animClass = direction > 0 ? 'slide-from-right' : 'slide-from-left';
+        
+        const targetId = SECTIONS[nextIndex];
+        const targetBtn = document.querySelectorAll('.nav-btn')[nextIndex];
+        
+        showSection(targetId, targetBtn, animClass);
+    }
+}
+
+function showSection(id, btn, animClass = 'slide-from-right') {
+    document.querySelectorAll('section').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('slide-from-right', 'slide-from-left');
+    });
+
     const target = document.getElementById(id);
     target.style.display = 'block';
-    target.style.animation = 'none';
-    target.offsetHeight; 
-    target.style.animation = null; 
+    
+    // Apply the specific direction class
+    target.classList.add(animClass);
+
+    // Update Nav Buttons
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    
     currentSectionIndex = SECTIONS.indexOf(id);
 }
 
@@ -229,12 +251,10 @@ function resetAllData() {
 let touchstartX = 0; let touchendX = 0;
 function handleGesture() {
     if (touchendX < touchstartX - 70) {
-        let next = currentSectionIndex + 1;
-        if (next < SECTIONS.length) showSection(SECTIONS[next], document.querySelectorAll('.nav-btn')[next]);
+        switchTab(1); // Swiping Left moves to next tab (content comes from right)
     }
     if (touchendX > touchstartX + 70) {
-        let next = currentSectionIndex - 1;
-        if (next >= 0) showSection(SECTIONS[next], document.querySelectorAll('.nav-btn')[next]);
+        switchTab(-1); // Swiping Right moves to prev tab (content comes from left)
     }
 }
 document.addEventListener('touchstart', e => touchstartX = e.changedTouches[0].screenX, {passive: true});
